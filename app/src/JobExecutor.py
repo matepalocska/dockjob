@@ -40,19 +40,27 @@ class JobExecutorClass(threading.Thread):
     if appObj.userforjobs == None:
       raise Exception('No user set')
 
+    # Get user info to check primary group
     try:
-      self.processUserID = pwd.getpwnam(appObj.userforjobs).pw_uid
+      userinfo = pwd.getpwnam(appObj.userforjobs)
+      self.processUserID = userinfo.pw_uid
+      user_primary_gid = userinfo.pw_gid
     except:
-      raise Exception('Could not find user id for ' + appObj.userforjobs)
+      raise Exception('Could not find user info for ' + appObj.userforjobs)
+    
     groupent = None
     try:
       groupent = grp.getgrnam(appObj.groupforjobs)
       self.processGroupID = groupent.gr_gid
     except:
       raise Exception('Could not find group id for ' + appObj.groupforjobs)
+      
     if not appObj.userforjobs == 'root':
-      if not appObj.userforjobs in groupent.gr_mem:
-        print(groupent.gr_mem)
+      # Check if user is in the group (either as member or as primary group)
+      user_in_group = (appObj.userforjobs in groupent.gr_mem) or (user_primary_gid == groupent.gr_gid)
+      if not user_in_group:
+        print(f"User primary gid: {user_primary_gid}, Target group gid: {groupent.gr_gid}")
+        print(f"Group members: {groupent.gr_mem}")
         raise Exception('User ' + appObj.userforjobs + ' is not in group ' + appObj.groupforjobs)
 
     print('Will run jobs as user: ' + appObj.userforjobs + ' (' + str(self.processUserID) + ')')

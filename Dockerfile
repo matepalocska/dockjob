@@ -1,84 +1,86 @@
-ARG RJM_BUILDQUASARAPP_IMAGE
-ARG RJM_VERSION
+ARG RJM_BUILDQUASARAPP_IMAGE=metcarob/docker-build-quasar-app:0.0.30
+ARG RJM_VERSION=latest
 
-# TODO it would be nice if the build process run the python tests
-
-FROM ${RJM_BUILDQUASARAPP_IMAGE} as quasar_build
-
-COPY ./frontend /frontend
-
+# Quasar frontend build
+FROM --platform=$BUILDPLATFORM ${RJM_BUILDQUASARAPP_IMAGE} AS quasar_build
+WORKDIR /frontend
+COPY ./frontend .
 RUN build_quasar_app /frontend pwa ${RJM_VERSION}
 
-FROM python:3.8-buster
+# NGINX alap (bookworm, arm64 ready, minden modul megvan)
+FROM nginx:1.27-bookworm AS nginx_base
 
-MAINTAINER Robert Metcalf
+# Python hozzáadása nginx-hez
+FROM nginx:1.27-bookworm AS base
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        build-essential \
+        python3-dev \
+        gettext-base \
+        curl \
+        ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
+LABEL maintainer="Robert Metcalf" \
+      description="Dockjob API + Frontend"
 
-ENV APP_DIR /app
-##APIAPP_FRONTEND is also configured in nginx conf
-ENV APIAPP_FRONTEND /frontend
-
-
-ENV APIAPP_APIURL http://localhost:80/dockjobapi
-ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
-ENV APIAPP_FRONTENDURL http://localhost:80/frontend
-ENV APIAPP_APIACCESSSECURITY '[]'
-ENV APIAPP_USERFORJOBS=dockjobuser
-ENV APIAPP_GROUPFORJOBS=dockjobgroup
-
-# APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
-# APIAPP_VERSION is not definable here as it is read from the VERSION file inside the image
+ENV APP_DIR=/app \
+    APIAPP_FRONTEND=/frontend \
+    APIAPP_APIURL=http://localhost:80/dockjobapi \
+    APIAPP_APIDOCSURL=http://localhost:80/apidocs \
+    APIAPP_FRONTENDURL=http://localhost:80/frontend \
+    APIAPP_APIACCESSSECURITY='[]' \
+    APIAPP_USERFORJOBS=dockjobuser \
+    APIAPP_GROUPFORJOBS=dockjobgroup \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 EXPOSE 80
 
+# uWSGI + RDS CA
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir uwsgi && \
+    wget --no-check-certificate \
+        https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+        -O /rds-combined-ca-bundle.pem || true
 
-# RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev libffi-dev && \
-#    python3 -m ensurepip && \
-#    rm -r /usr/lib/python*/ensurepip && \
-#    pip3 install --upgrade pip setuptools && \
-#    rm -r /root/.cache && \
-#    pip3 install --upgrade pip && \
-#    mkdir ${APP_DIR} && \
-#    mkdir ${APIAPP_FRONTEND} && \
-#    addgroup ${APIAPP_GROUPFORJOBS} && \
-#    adduser --quiet --disabled-password --gecos "" --ingroup ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
-#    mkdir /var/log/uwsgi && \
-#    pip3 install uwsgi && \
-#    pip3 install cffi
+# Nginx log symlink (dir már létezik)
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
-COPY install-nginx-debian.sh /
+# App user
+RUN groupadd --system ${APIAPP_GROUPFORJOBS} && \
+    useradd --system --no-create-home --shell /bin/false \
+            --gid ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS}
 
-RUN apt-get install ca-certificates curl && \
-    bash /install-nginx-debian.sh && \
-    mkdir ${APP_DIR} && \
-    mkdir ${APIAPP_FRONTEND} && \
-    addgroup ${APIAPP_GROUPFORJOBS} && \
-    adduser --quiet --disabled-password --gecos "" --ingroup ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
-    usermod -a -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
-    mkdir /var/log/uwsgi && \
-    pip3 install uwsgi && \
-    wget --ca-directory=/etc/ssl/certs https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -O /rds-combined-ca-bundle.pem
+WORKDIR ${APP_DIR}
+COPY ./app/src ${APP_DIR}/
+# JAVÍTOTT SOR: --break-system-packages!
+RUN pip3 install --no-cache-dir --break-system-packages --upgrade pip && \
+    pip3 install --no-cache-dir --break-system-packages uwsgi && \
+    pip3 install --no-cache-dir --break-system-packages -r requirements.txt
 
-
-COPY ./app/src ${APP_DIR}
-RUN pip3 install -r ${APP_DIR}/requirments.txt
-
-COPY --from=quasar_build ./frontend/dist/pwa ${APIAPP_FRONTEND}
+# Frontend + config
+COPY --from=quasar_build /frontend/dist/pwa ${APIAPP_FRONTEND}/
 COPY ./VERSION /VERSION
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf
 COPY ./uwsgi.ini /uwsgi.ini
 COPY ./healthcheck.sh /healthcheck.sh
 
+# Jogosultságok
+RUN chmod +x /run_app_docker.sh /healthcheck.sh && \
+    mkdir -p ${APP_DIR} ${APIAPP_FRONTEND} /var/log/uwsgi && \
+    chown -R ${APIAPP_USERFORJOBS}:${APIAPP_GROUPFORJOBS} \
+        ${APP_DIR} ${APIAPP_FRONTEND} /var/log/uwsgi /VERSION /uwsgi.ini /run_app_docker.sh
+
+# USER ${APIAPP_USERFORJOBS} - Commented out because JobExecutor requires root
+# Running as root for now due to JobExecutor requirements
+
 STOPSIGNAL SIGTERM
-
-
 CMD ["/run_app_docker.sh"]
 
-# Regular checks. Docker won't send traffic to container until it is healthy
-#  and when it first starts it won't check the health until the interval so I can't have
-#  a higher value without increasing the startup time
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD /healthcheck.sh
-
-##docker run --name dockjob -p 80:80 -d metcarob/dockjob:latest
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD /healthcheck.sh || exit 1
