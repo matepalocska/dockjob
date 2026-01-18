@@ -48,6 +48,13 @@ I put images for this project into the [Docker hub](https://hub.docker.com/r/mat
 - **Generic configuration templates** for easy customization
 - **Comprehensive documentation** for deployment scenarios
 
+#### ⏱️ **Enhanced Job Control & Execution**
+- **Configurable execution timeouts** - Set custom timeout per job (0 = unlimited, default = 15 seconds)
+- **Improved job validation** with proper input validation for all job parameters
+- **Enhanced job execution** with per-job timeout enforcement instead of hardcoded limits
+- **Better error handling** for job creation and execution with detailed validation messages
+- **UI improvements** for job creation with timeout configuration in the web interface
+
 #### 🎨 **UI & Branding**
 - **Custom logo** designed for TrueNAS catalog integration
 - **Professional branding** with SVG and PNG logo variants
@@ -69,6 +76,7 @@ I put images for this project into the [Docker hub](https://hub.docker.com/r/mat
 
  - Runs commands based on a schedule
  - 'Run now' button as well as scheduled run
+ - **Configurable execution timeouts** - Set custom timeout per job (0 = unlimited, >0 = custom timeout in seconds)
  - Web App UI developed which connects to api.
  - Works in any web context
  - Works from any port
