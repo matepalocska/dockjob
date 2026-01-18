@@ -186,7 +186,8 @@ class jobsDataClass():
       newValues.get('StateChangeUnknownJobGUID',None),
       AfterSuccessJobGUID=newValues.get('AfterSuccessJobGUID', None),
       AfterFailJobGUID=newValues.get('AfterFailJobGUID', None),
-      AfterUnknownJobGUID=newValues.get('AfterUnknownJobGUID', None)
+      AfterUnknownJobGUID=newValues.get('AfterUnknownJobGUID', None),
+      executionTimeoutSeconds=newValues.get('executionTimeoutSeconds', 15)
     )
 
     # must happen after setting values otherwise old values will be written

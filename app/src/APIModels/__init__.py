@@ -28,6 +28,7 @@ def getJobModel(flastRestPlusAPIObject):
       'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise'),
       'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
       'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job.'),
+      'executionTimeoutSeconds': fields.Integer(default=15,description='Maximum seconds job can run before being terminated (0 for no timeout)'),
       'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
       'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
       'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),

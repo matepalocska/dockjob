@@ -60,6 +60,11 @@
               error-label="Error"
               :error="createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"
             />
+            <q-input v-model="showCreateJobDialogData.executionTimeoutSeconds" type="number" label="Execution Timeout - Maximum seconds job can run before being terminated (0 for no timeout)"
+              error-label="Must be 0 or greater"
+              :error="showCreateJobDialogData.executionTimeoutSeconds < 0"
+              helper="Default: 15 seconds. Set to 0 for no timeout limit."
+            />
             <q-toggle v-model="showCreateJobDialogData.enabled" label="Automatic Schedule Enabled"/>
             <q-card
               v-if="showCreateJobDialogData.enabled"
@@ -171,6 +176,7 @@ function initShowCreateJobDialogData ({defaultUserTimezone}) {
       name: ''
     },
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
+    executionTimeoutSeconds: 15,
     enabled: true,
     repetitionInterval: {
       mode: 'DAILY', // Monthly, Daily, Hourly
@@ -366,6 +372,10 @@ export default {
           this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
         }
 
+        if (typeof (origJobObject.executionTimeoutSeconds) !== 'undefined' && origJobObject.executionTimeoutSeconds !== null) {
+          this.showCreateJobDialogData.executionTimeoutSeconds = origJobObject.executionTimeoutSeconds
+        }
+
         if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
           var arr = []
           if (this.origJobObject.repetitionInterval.startsWith('DAILY')) {
@@ -458,7 +468,8 @@ export default {
         'command': this.showCreateJobDialogData.command,
         'repetitionInterval': this.repititionIntervalString,
         'pinned': this.showCreateJobDialogData.pinned,
-        'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': parseInt(this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) || 0
+        'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': parseInt(this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) || 0,
+        'executionTimeoutSeconds': this.showCreateJobDialogData.executionTimeoutSeconds === '' || this.showCreateJobDialogData.executionTimeoutSeconds == null ? 15 : parseInt(this.showCreateJobDialogData.executionTimeoutSeconds)
       }
       var lis = globalUtils.getPostCompletionJobTypeList()
       for (var x in lis) {

@@ -144,6 +144,7 @@ export default {
         { name: 'mostRecentCompletionStatus', required: false, label: 'Completion Status', align: 'left', field: 'mostRecentCompletionStatus', sortable: true, filter: true },
         { name: 'pinned', required: false, label: 'Pinned', align: 'left', field: 'pinned', sortable: true, filter: true },
         { name: 'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown', required: false, label: 'Unknown Timeout', align: 'left', field: 'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown', sortable: true, filter: true },
+        { name: 'executionTimeoutSeconds', required: false, label: 'Execution Timeout (s)', align: 'left', field: 'executionTimeoutSeconds', sortable: true, filter: true },
         { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true, linkToOtherJob: true },
         { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true, linkToOtherJob: true },
         { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true, linkToOtherJob: true },

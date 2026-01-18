@@ -16,6 +16,10 @@ class jobFactoryClass():
     for fieldToDefault in fieldsToDefaultToNone:
       if fieldToDefault not in jobFromDB:
         jobFromDB[fieldToDefault] = None
+    
+    # Handle executionTimeoutSeconds field with default
+    if "executionTimeoutSeconds" not in jobFromDB:
+      jobFromDB["executionTimeoutSeconds"] = 15
 
     if "PrivateExternalTrigger" not in jobFromDB:
       jobFromDB["PrivateExternalTrigger"] = {
@@ -36,6 +40,7 @@ class jobFactoryClass():
       AfterSuccessJobGUID = jobFromDB["AfterSuccessJobGUID"],
       AfterFailJobGUID = jobFromDB["AfterFailJobGUID"],
       AfterUnknownJobGUID = jobFromDB["AfterUnknownJobGUID"],
+      executionTimeoutSeconds = jobFromDB["executionTimeoutSeconds"],
       guid = jobFromDB["guid"],
       loadingObjectVersion = jobFromDBTuple[1],
       PrivateExternalTrigger = jobFromDB["PrivateExternalTrigger"],
@@ -69,6 +74,7 @@ class jobClass():
   AfterFailJobGUID = None
   AfterUnknownJobGUID = None
   PrivateExternalTrigger = None
+  executionTimeoutSeconds = None
 
   CompletionstatusLock = None
   objectVersion = None
@@ -133,6 +139,7 @@ class jobClass():
       AfterSuccessJobGUID,
       AfterFailJobGUID,
       AfterUnknownJobGUID,
+      executionTimeoutSeconds,
       guid, #used when loading from DB
       verifyDependentJobGuids, #False when testing
       loadingObjectVersion, #used when loading from DB
@@ -160,6 +167,7 @@ class jobClass():
     if overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == 0:
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+    self.executionTimeoutSeconds = executionTimeoutSeconds if executionTimeoutSeconds is not None else 15
     self.mostRecentCompletionStatus = 'Unknown'
     if verifyDependentJobGuids:
       self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
@@ -261,7 +269,8 @@ class jobClass():
     StateChangeUnknownJobGUID,
     AfterSuccessJobGUID,
     AfterFailJobGUID,
-    AfterUnknownJobGUID
+    AfterUnknownJobGUID,
+    executionTimeoutSeconds
   ):
     self.name = name
     self.command = command
@@ -272,6 +281,7 @@ class jobClass():
     if overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown==0:
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+    self.executionTimeoutSeconds = executionTimeoutSeconds if executionTimeoutSeconds is not None else 15
     self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
     self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
     self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)

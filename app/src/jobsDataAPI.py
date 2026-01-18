@@ -102,6 +102,7 @@ def registerAPI(appObj):
         content.get('AfterSuccessJobGUID', None),
         content.get('AfterFailJobGUID', None),
         content.get('AfterUnknownJobGUID', None),
+        content.get('executionTimeoutSeconds', 15),
         guid=None,
         verifyDependentJobGuids=True,
         loadingObjectVersion=None,

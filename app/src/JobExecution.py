@@ -38,6 +38,7 @@ def getJobExecutionModel(appObj):
 class SimpleJobObj():
   name = 'SimpleJobObjConstantName'
   guid = None
+  executionTimeoutSeconds = 15  # Default timeout for SimpleJobObj
   def __init__(self):
     self.guid = str(uuid.uuid4())
 

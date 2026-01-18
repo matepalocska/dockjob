@@ -122,9 +122,19 @@ class JobExecutorClass(threading.Thread):
     start_time = time.time()
     proc = subprocess.Popen(jobExecutionObj.jobCommand, stdin=stdinPipe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction(), env=job_env)
     returncode = None
+    # Use per-job timeout, default to 15 seconds if not set, 0 means no timeout
+    jobTimeout = self.timeout  # Default fallback (15 seconds)
+    if hasattr(jobExecutionObj, 'jobObj') and jobExecutionObj.jobObj is not None:
+      if hasattr(jobExecutionObj.jobObj, 'executionTimeoutSeconds'):
+        if jobExecutionObj.jobObj.executionTimeoutSeconds is not None:
+          if jobExecutionObj.jobObj.executionTimeoutSeconds == 0:
+            jobTimeout = 0  # 0 means no timeout
+          elif jobExecutionObj.jobObj.executionTimeoutSeconds > 0:
+            jobTimeout = jobExecutionObj.jobObj.executionTimeoutSeconds
+    
     while (returncode == None):
       returncode = proc.poll()
-      if (time.time() - start_time) > self.timeout:
+      if jobTimeout > 0 and (time.time() - start_time) > jobTimeout:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
         #valid return codes are between 0-255. I have hijacked -1 for timeout
         returncode = -1
