@@ -1,16 +1,28 @@
+# DockJob Custom App for TrueNAS
+# Logo: https://raw.githubusercontent.com/matepalocska/dockjob/main/catalog/dockjob-logo.png
+# Description: Job scheduler and executor with web interface
+#
+# CONFIGURATION GUIDE:
+# 1. Replace YOUR_USERNAME with your Docker Hub username
+# 2. Replace YOUR_TRUENAS_HOST with your TrueNAS hostname/IP
+# 3. Replace YOUR_PORT with your desired external port (e.g., 30555)
+# 4. Replace YOUR_SECURE_PASSWORD with a strong password
+# 5. Replace YOUR_APP_NAME with your custom app name in TrueNAS
+# 6. Ensure the volume paths match your TrueNAS app configuration
+
 services:
   dockjob:
     container_name: dockjob
     # user: "568:568"  # Commented out - running as root for JobExecutor compatibility
     environment:
-      - APIAPP_APIURL=http://truenas-dt.tail56f748.ts.net:30555/api
+      - APIAPP_APIURL=http://YOUR_TRUENAS_HOST:PORT/api
       - >-
-        APIAPP_TRIGGERAPIURL=http://truenas-dt.tail56f748.ts.net:30555/triggerapi
-      - APIAPP_APIDOCSURL=http://truenas-dt.tail56f748.ts.net:30555/apidocs
-      - APIAPP_FRONTENDURL=http://truenas-dt.tail56f748.ts.net:30555/frontend
+        APIAPP_TRIGGERAPIURL=http://YOUR_TRUENAS_HOST:PORT/triggerapi
+      - APIAPP_APIDOCSURL=http://YOUR_TRUENAS_HOST:PORT/apidocs
+      - APIAPP_FRONTENDURL=http://YOUR_TRUENAS_HOST:PORT/frontend
       - >-
-        APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN=http://truenas-dt.tail56f748.ts.net:30555
-      - DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=password1234
+        APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN=http://YOUR_TRUENAS_HOST:PORT
+      - DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=YOUR_SECURE_PASSWORD
       - APIAPP_USERFORJOBS=apps
       - APIAPP_GROUPFORJOBS=apps
       - >-
@@ -31,12 +43,12 @@ services:
         - CMD
         - /healthcheck.sh
       timeout: 3s
-    image: matepalocska/dockjob:latest
+    image: YOUR_USERNAME/dockjob:latest
     ports:
-      - '30555:80'
+      - 'YOUR_PORT:80'
     restart: unless-stopped
     volumes:
-      - /mnt/.ix-apps/app_configs/cust-script-runner:/config:rw
-      - /mnt/.ix-apps/app_mounts/cust-script-runner/scripts:/scripts:rw
-      - /mnt/.ix-apps/app_mounts/cust-script-runner/data:/data:rw
+      - /mnt/.ix-apps/app_configs/YOUR_APP_NAME:/config:rw
+      - /mnt/.ix-apps/app_mounts/YOUR_APP_NAME/scripts:/scripts:rw
+      - /mnt/.ix-apps/app_mounts/YOUR_APP_NAME/data:/data:rw
 version: '3.8'

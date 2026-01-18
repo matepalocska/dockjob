@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-DOCKER_USERNAME=${1:-"yourusername"}
+DOCKER_USERNAME=${1:-"matepalocska"}
 TAG_SUFFIX=${2:-""}
 VERSION=$(cat VERSION)
 IMAGE_NAME="$DOCKER_USERNAME/dockjob"
