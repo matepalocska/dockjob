@@ -32,8 +32,8 @@ ENV APP_DIR=/app \
     APIAPP_APIDOCSURL=http://localhost:80/apidocs \
     APIAPP_FRONTENDURL=http://localhost:80/frontend \
     APIAPP_APIACCESSSECURITY='[]' \
-    APIAPP_USERFORJOBS=dockjobuser \
-    APIAPP_GROUPFORJOBS=dockjobgroup \
+    APIAPP_USERFORJOBS=apps \
+    APIAPP_GROUPFORJOBS=apps \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
@@ -51,9 +51,9 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
 # App user
-RUN groupadd --system ${APIAPP_GROUPFORJOBS} && \
+RUN groupadd --system --gid 568 ${APIAPP_GROUPFORJOBS} && \
     useradd --system --no-create-home --shell /bin/false \
-            --gid ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS}
+            --uid 568 --gid ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS}
 
 WORKDIR ${APP_DIR}
 COPY ./app/src ${APP_DIR}/

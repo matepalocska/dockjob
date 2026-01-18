@@ -19,8 +19,8 @@ services:
       - DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=change-this-password
       
       # Optional - Job execution settings
-      - APIAPP_USERFORJOBS=dockjobuser
-      - APIAPP_GROUPFORJOBS=dockjobgroup
+      - APIAPP_USERFORJOBS=apps
+      - APIAPP_GROUPFORJOBS=apps
       
       # Data persistence - Store job data in mounted volume
       - APIAPP_OBJECTSTORECONFIG={"Type":"SimpleFileStore", "BaseLocation": "/data"}

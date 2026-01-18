@@ -1,0 +1,42 @@
+services:
+  dockjob:
+    container_name: dockjob
+    # user: "568:568"  # Commented out - running as root for JobExecutor compatibility
+    environment:
+      - APIAPP_APIURL=http://truenas-dt.tail56f748.ts.net:30555/api
+      - >-
+        APIAPP_TRIGGERAPIURL=http://truenas-dt.tail56f748.ts.net:30555/triggerapi
+      - APIAPP_APIDOCSURL=http://truenas-dt.tail56f748.ts.net:30555/apidocs
+      - APIAPP_FRONTENDURL=http://truenas-dt.tail56f748.ts.net:30555/frontend
+      - >-
+        APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN=http://truenas-dt.tail56f748.ts.net:30555
+      - DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=password1234
+      - APIAPP_USERFORJOBS=apps
+      - APIAPP_GROUPFORJOBS=apps
+      - >-
+        APIAPP_OBJECTSTORECONFIG={"Type":"SimpleFileStore", "BaseLocation":
+        "/data"}
+    # Ensure proper permissions for mounted volumes
+    command: >
+      sh -c "
+      chown -R 568:568 /data /scripts /config 2>/dev/null || true;
+      chmod -R 755 /data /scripts /config 2>/dev/null || true;
+      exec /run_app_docker.sh
+      "
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 5s
+      test:
+        - CMD
+        - /healthcheck.sh
+      timeout: 3s
+    image: matepalocska/dockjob:latest
+    ports:
+      - '30555:80'
+    restart: unless-stopped
+    volumes:
+      - /mnt/.ix-apps/app_configs/cust-script-runner:/config:rw
+      - /mnt/.ix-apps/app_mounts/cust-script-runner/scripts:/scripts:rw
+      - /mnt/.ix-apps/app_mounts/cust-script-runner/data:/data:rw
+version: '3.8'

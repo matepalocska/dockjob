@@ -20,8 +20,8 @@ export APIAPP_APIURL=http://cat-sdts.metcarob-home.com/api
 export APIAPP_APIDOCSURL=http://cat-sdts.metcarob-home.com/apidocs
 export APIAPP_FRONTENDURL=http://cat-sdts.metcarob-home.com/frontend
 export APIAPP_APIACCESSSECURITY=[]
-export APIAPP_USERFORJOBS=dockjobuser
-export APIAPP_GROUPFORJOBS=dockjobgroup
+export APIAPP_USERFORJOBS=apps
+export APIAPP_GROUPFORJOBS=apps
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
