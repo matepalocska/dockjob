@@ -19,7 +19,7 @@ def getJobCreationModel(appObj):
     'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
     'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
     'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
-    'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job. (0 for no override)'),
+    'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=0,min=0,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job. (0 for no override)'),
     'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
     'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
     'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),

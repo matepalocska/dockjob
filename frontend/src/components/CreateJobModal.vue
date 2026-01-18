@@ -458,7 +458,7 @@ export default {
         'command': this.showCreateJobDialogData.command,
         'repetitionInterval': this.repititionIntervalString,
         'pinned': this.showCreateJobDialogData.pinned,
-        'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+        'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': parseInt(this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) || 0
       }
       var lis = globalUtils.getPostCompletionJobTypeList()
       for (var x in lis) {
